@@ -1,5 +1,7 @@
 -- +goose Up
 -- +goose StatementBegin
+
+-- User
 CREATE TABLE IF NOT EXISTS users (
     id BIGSERIAL PRIMARY KEY,
     uuid uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -9,6 +11,7 @@ CREATE TABLE IF NOT EXISTS users (
     role_id int2
 );
 
+-- UserRole
 CREATE TYPE USER_ROLE AS ENUM ('USER', 'ADMIN');
 
 CREATE TABLE IF NOT EXISTS user_role (
@@ -19,6 +22,7 @@ CREATE TABLE IF NOT EXISTS user_role (
 ALTER TABLE IF EXISTS users
     ADD FOREIGN KEY (role_id) REFERENCES user_role(id);
 
+-- CompanyRole
 CREATE TYPE COMPANY_ROLE AS ENUM ('COMPANY_ROLE_1', 'COMPANY_ROLE_2');
 
 CREATE TABLE IF NOT EXISTS company_role (
@@ -26,57 +30,89 @@ CREATE TABLE IF NOT EXISTS company_role (
     company_role COMPANY_ROLE NOT NULL
 );
 
+-- Company
 CREATE TABLE IF NOT EXISTS company (
     id BIGSERIAL PRIMARY KEY,
+    uuid uuid NOT NULL DEFAULT gen_random_uuid(),
     company_name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     company_role_id int2 REFERENCES company_role(id)
 );
 
+-- ApiCredentials
 CREATE TABLE IF NOT EXISTS api_credentials (
     id BIGSERIAL PRIMARY KEY,
-    api_credentials VARCHAR(255) NOT NULL
+    api_credentials VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 ALTER TABLE IF EXISTS api_credentials_to_company
-    ADD COLUMN IF NOT EXISTS api_credentials_id BIGSERIAL,
-    ADD FOREIGN KEY (api_credentials_id) REFERENCES api_credentials(id),
-    ADD COLUMN IF NOT EXISTS company_id BIGSERIAL,
-    ADD FOREIGN KEY (company_id) REFERENCES company(id);
+    ADD COLUMN IF NOT EXISTS api_credentials_id BIGSERIAL REFERENCES api_credentials(id),
+    ADD COLUMN IF NOT EXISTS company_id BIGSERIAL REFERENCES company(id);
 
+-- Store
 CREATE TABLE IF NOT EXISTS store (
     id BIGSERIAL PRIMARY KEY,
-    store_name VARCHAR(255) NOT NULL
+    uuid uuid NOT NULL DEFAULT gen_random_uuid(),
+    store_name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
+-- App
 CREATE TABLE IF NOT EXISTS app (
     id BIGSERIAL PRIMARY KEY,
-    app_name VARCHAR(255) NOT NULL
+    uuid uuid NOT NULL DEFAULT gen_random_uuid(),
+    app_name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
+-- AppVersion
 CREATE TABLE IF NOT EXISTS app_version (
     id BIGSERIAL PRIMARY KEY,
     api_version VARCHAR(255) NOT NULL
 );
 
 ALTER TABLE IF EXISTS app_version
-    ADD COLUMN IF NOT EXISTS app_id BIGSERIAL,
-    ADD FOREIGN KEY (app_id) REFERENCES app(id);
+    ADD COLUMN IF NOT EXISTS app_id BIGSERIAL REFERENCES app(id);
 
+-- Review
 CREATE TABLE IF NOT EXISTS review (
     id BIGSERIAL PRIMARY KEY,
+    uuid uuid NOT NULL DEFAULT gen_random_uuid(),
     review_text TEXT NOT NULL,
     store_id bigserial REFERENCES store(id),
-    app_version_id bigserial REFERENCES app_version(id)
+    app_version_id bigserial REFERENCES app_version(id),
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
--- create table review_country
--- create table review_reply
--- create table review_device_meta
+-- ReviewReply
+CREATE TABLE IF NOT EXISTS review_reply (
+    id BIGSERIAL PRIMARY KEY,
+    uuid uuid NOT NULL DEFAULT gen_random_uuid(),
+    reply_text VARCHAR(255) NOT NULL,
+    review_id bigserial REFERENCES review(id),
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
 
+-- ReviewDeviceMeta
+CREATE TABLE IF NOT EXISTS review_device_meta (
+  id BIGSERIAL PRIMARY KEY,
+  review_device_meta VARCHAR(255) NOT NULL,
+  review_id bigserial REFERENCES review(id),
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+-- ReviewCategory
 CREATE TABLE IF NOT EXISTS review_category (
     id SERIAL PRIMARY KEY,
     review_category_name VARCHAR(255) NOT NULL
---     company_id bigserial REFERENCES company(id)
 );
 
 CREATE TABLE IF NOT EXISTS review_to_category(
@@ -84,11 +120,10 @@ CREATE TABLE IF NOT EXISTS review_to_category(
 );
 
 ALTER TABLE IF EXISTS review_to_category
-    ADD COLUMN IF NOT EXISTS review_id BIGSERIAL,
-    ADD FOREIGN KEY (review_id) REFERENCES review(id),
-    ADD COLUMN IF NOT EXISTS category_id SERIAL,
-    ADD FOREIGN KEY (category_id) REFERENCES review_category(id);
+    ADD COLUMN IF NOT EXISTS review_id BIGSERIAL REFERENCES review(id),
+    ADD COLUMN IF NOT EXISTS category_id SERIAL REFERENCES review_category(id);
 
+-- ReviewLabel
 CREATE TABLE IF NOT EXISTS review_label (
     id SERIAL PRIMARY KEY,
     review_label_name VARCHAR(255) NOT NULL
@@ -99,10 +134,17 @@ CREATE TABLE IF NOT EXISTS review_to_label(
 );
 
 ALTER TABLE IF EXISTS review_to_label
-    ADD COLUMN IF NOT EXISTS review_id BIGSERIAL,
-    ADD FOREIGN KEY (review_id) REFERENCES review(id),
-    ADD COLUMN IF NOT EXISTS label_id SERIAL,
-    ADD FOREIGN KEY (label_id) REFERENCES review_label(id);
+    ADD COLUMN IF NOT EXISTS review_id BIGSERIAL REFERENCES review(id) ON DELETE CASCADE,
+    ADD COLUMN IF NOT EXISTS label_id SERIAL REFERENCES review_label(id) ON DELETE CASCADE;
+
+-- ReviewCountry
+CREATE TABLE IF NOT EXISTS review_country (
+    id SERIAL PRIMARY KEY,
+    review_country_name VARCHAR(255) NOT NULL
+);
+
+ALTER TABLE  IF EXISTS review_label
+    ADD COLUMN IF NOT EXISTS country_id SERIAL REFERENCES review_country(id)
 
 -- +goose StatementEnd
 
