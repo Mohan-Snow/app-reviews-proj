@@ -1,7 +1,7 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE TABLE review_country (
-    id BIGSERIAL PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS review_country (
+    id SERIAL PRIMARY KEY,
     review_country_name VARCHAR(255) NOT NULL
 );
 -- +goose StatementEnd
