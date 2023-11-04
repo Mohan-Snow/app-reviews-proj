@@ -1,0 +1,33 @@
+TODO: ПОЧИТАТЬ!!!!
+1. with clause - cte - common table expression (?)
+2. select for update (?)
+3. vaccum, rebuild index (прочитать в контексте postgres)
+4. репликация баз данных
+5. pg-bouncer
+
+ERROR:
+data type character varying has no default operator class for access method "gin"
+You must specify an operator class for the index or define a default operator class for the data type.
+
+ANSWER:
+For full text search use:
+CREATE INDEX test_gin_idx ON test USING gin (to_tsvector('english', the_text));
+For trigram search you can use pg_trgm extension
+CREATE EXTENSION pg_trgm;
+CREATE INDEX test_the_text_gin_idx ON test USING GIN (the_text gin_trgm_ops);
+
+CREATE TABLE IF NOT EXISTS users (
+    id BIGSERIAL PRIMARY KEY, -- todo: знать капасити SERIAL и BIGSERIAL
+    uuid uuid NOT NULL DEFAULT gen_random_uuid(), -- todo: использовать "create extension", поискать по uuid column
+    username VARCHAR(255) NOT NULL, -- todo: найти доп инфу про различия
+    user_role USER_ROLE,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(), -- todo: разобраться с таймзонами. как храниться? Чем отличается timestamp от timestampTZ?
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(), -- todo: добавить скрипт с триггером по апдейту даты
+    role_id int2
+);
+
+CREATE INDEX IF NOT EXISTS "INDX_CREATED_AT" ON review(created_at); -- todo: добавить DESC
+CREATE INDEX IF NOT EXISTS "INDX_STORE_ID_AND_APP_VERSION_ID" ON review (store_id, app_version_id) ;
+CREATE INDEX IF NOT EXISTS "INDX_REVIEW_TEXT" ON review USING gin(to_tsvector('russian', review_text)); -- todo: написать пример select по этому полю
+
+
