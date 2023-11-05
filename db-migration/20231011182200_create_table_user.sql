@@ -18,7 +18,7 @@ CREATE TRIGGER update_users_updated_at_trigger
     FOR EACH ROW
 EXECUTE PROCEDURE update_updated_at_field();
 
-CREATE INDEX IF NOT EXISTS "INDX_USERNAME" ON users USING gin (to_tsvector('english', username));
+CREATE INDEX IF NOT EXISTS INDX_USERNAME ON users USING gin (to_tsvector('english', username));
 -- +goose StatementEnd
 
 -- +goose Down
