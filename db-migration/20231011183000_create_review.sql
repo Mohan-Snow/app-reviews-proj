@@ -16,9 +16,9 @@ CREATE TRIGGER update_review_updated_at_trigger
     FOR EACH ROW
 EXECUTE PROCEDURE update_updated_at_field();
 
-CREATE INDEX IF NOT EXISTS "INDX_CREATED_AT" ON review(created_at);
-CREATE INDEX IF NOT EXISTS "INDX_STORE_ID_AND_APP_VERSION_ID" ON review (store_id, app_version_id) ;
-CREATE INDEX IF NOT EXISTS "INDX_REVIEW_TEXT" ON review USING gin(to_tsvector('russian', review_text));
+CREATE INDEX IF NOT EXISTS INDX_CREATED_AT ON review(created_at DESC);
+CREATE INDEX IF NOT EXISTS INDX_STORE_ID_AND_APP_VERSION_ID ON review (store_id, app_version_id) ;
+CREATE INDEX IF NOT EXISTS INDX_REVIEW_TEXT ON review USING gin(to_tsvector('russian', review_text));
 -- +goose StatementEnd
 
 -- +goose Down
