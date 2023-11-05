@@ -183,12 +183,15 @@ In the default PostgreSQL configuration, the AUTOVACUUM daemon is enabled and al
 The daemon will run VACUUM and ANALYZE at regular intervals. If the daemon is enabled, these commands can be run to supplement the daemon's work.
 
 To confirm whether the autovacuum daemon is running on LINUX, use the command below:
-
+```
 $ ps aux|grep autovacuum|grep -v grep
-postgres           334   0.0  0.0  2654128   1232   ??  Ss   16Mar17   0:05.63 postgres: autovacuum launcher process  
+postgres           334   0.0  0.0  2654128   1232   ??  Ss   16Mar17   0:05.63 postgres: autovacuum launcher process
+```
 Alternatively, the SQL query below can be used to check the status of the autovacuum in the pg_settings:
-
+```postgresql
 SELECT name, setting FROM pg_settings WHERE name ILIKE '%autovacuum%';
+```
+
 Vacuum
 The VACUUM command will reclaim storage space occupied by dead tuples.
 In normal PostgreSQL operation, tuples that are deleted or obsoleted by an update are not physically removed from their table
