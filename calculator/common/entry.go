@@ -1,6 +1,8 @@
 package common
 
+import "app-reviews-proj/calculator/internal"
+
 type Entry struct {
-	Values   string
-	Operator string
+	Values   []int
+	Operator internal.OperationType
 }

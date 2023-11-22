@@ -1,5 +1,9 @@
 package internal
 
+import (
+	"net/http"
+)
+
 type OperationType string
 
 const AddOperationType OperationType = "add"
@@ -20,5 +24,9 @@ type DivideCalculationService interface {
 }
 
 type ICalcManager interface {
-	CalculationManager(operation OperationType) CalculationService
+	ManageCalculation(operation OperationType) CalculationService
+}
+
+type ICalculationHandler interface {
+	Calculate(writer http.ResponseWriter, request *http.Request)
 }

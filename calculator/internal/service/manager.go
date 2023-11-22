@@ -14,7 +14,7 @@ func NewCalculationManager(add internal.AddCalculationService, divide internal.D
 	}
 }
 
-func (c calcManager) CalculationManager(operation internal.OperationType) internal.CalculationService {
+func (c calcManager) ManageCalculation(operation internal.OperationType) internal.CalculationService {
 	switch operation {
 	case internal.AddOperationType:
 		return c.add
