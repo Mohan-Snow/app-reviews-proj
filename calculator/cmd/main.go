@@ -15,13 +15,14 @@ import (
 	"syscall"
 )
 
-// добавить handler package (туда добавить хэндлеры (Х4) для каждого типа операции) в internal
 // добавить конфиг в файл conf с конфгурациями
 // подключить линтер, поправить ошибки
 
 func main() {
 	//ao := service.NewAddOperation()
 	//do := service.NewDivideOperation()
+	//mo := service.NewMultiplyOperation()
+	//so := service.NewSubtractOperation())
 	//cm := service.NewCalculationManager(ao, do)
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -36,6 +37,8 @@ func main() {
 	app := fx.New(
 		fx.Provide(service.NewAddOperation),
 		fx.Provide(service.NewDivideOperation),
+		fx.Provide(service.NewMultiplyOperation),
+		fx.Provide(service.NewSubtractOperation),
 		fx.Provide(service.NewCalculationManager),
 		fx.Provide(handler.NewHandler),
 		fx.Provide(chi.NewRouter),

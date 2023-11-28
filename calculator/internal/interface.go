@@ -23,6 +23,13 @@ type DivideCalculationService interface {
 	CalculationService
 }
 
+type MultiplyCalculationService interface {
+	CalculationService
+}
+type SubtractCalculationService interface {
+	CalculationService
+}
+
 type ICalcManager interface {
 	ManageCalculation(operation OperationType) CalculationService
 }

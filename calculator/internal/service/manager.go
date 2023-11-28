@@ -3,14 +3,23 @@ package service
 import "app-reviews-proj/calculator/internal"
 
 type calcManager struct {
-	add    internal.CalculationService // убираем логику инициализации
-	divide internal.CalculationService
+	add      internal.CalculationService // убираем логику инициализации
+	divide   internal.CalculationService
+	multiply internal.CalculationService
+	subtract internal.CalculationService
 }
 
-func NewCalculationManager(add internal.AddCalculationService, divide internal.DivideCalculationService) internal.ICalcManager {
+func NewCalculationManager(
+	add internal.AddCalculationService,
+	divide internal.DivideCalculationService,
+	multiply internal.MultiplyCalculationService,
+	subtract internal.SubtractCalculationService,
+) internal.ICalcManager {
 	return calcManager{
-		add:    add,
-		divide: divide,
+		add:      add,
+		divide:   divide,
+		multiply: multiply,
+		subtract: subtract,
 	}
 }
 
@@ -21,9 +30,9 @@ func (c calcManager) ManageCalculation(operation internal.OperationType) interna
 	case internal.DivideOperationType:
 		return c.divide
 	case internal.MultiplicationOperationType:
-		fallthrough
+		return c.multiply
 	case internal.SubtractionOperationType:
-		fallthrough
+		return c.subtract
 	default:
 		panic("Not Implemented!!")
 	}
