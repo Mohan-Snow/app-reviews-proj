@@ -13,7 +13,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 )
 
 // добавить handler package (туда добавить хэндлеры (Х4) для каждого типа операции) в internal
@@ -25,66 +24,91 @@ func main() {
 	//do := service.NewDivideOperation()
 	//cm := service.NewCalculationManager(ao, do)
 
+	ctx, cancel := context.WithCancel(context.Background())
+	kill := make(chan os.Signal, 1)
+	signal.Notify(kill)
+
+	go func() {
+		<-kill
+		cancel()
+	}()
+
 	app := fx.New(
-		fx.Provide(
-			service.NewAddOperation,
-			service.NewDivideOperation,
-			service.NewCalculationManager,
-			handler.NewHandler,
-			chi.NewRouter,
-		),
-		//fx.Invoke(runCalculation),
+		fx.Provide(service.NewAddOperation),
+		fx.Provide(service.NewDivideOperation),
+		fx.Provide(service.NewCalculationManager),
+		fx.Provide(handler.NewHandler),
+		fx.Provide(chi.NewRouter),
+		fx.Invoke(startHttpServer),
+		//fx.Invoke(runHttpServer),
 	)
 	app.Run()
-
-	//ch := internal.ICalculationHandler
-	var ch internal.ICalculationHandler
-	//router := *chi.Mux
-	var router *chi.Mux
-
-	router.Route("/", func(subRouter chi.Router) {
-		subRouter.MethodFunc(http.MethodPost, "/calc", ch.Calculate)
-	})
-
-	server := http.Server{
-		Addr:    "localhost:8081",
-		Handler: router,
+	if err := app.Start(ctx); err != nil {
+		fmt.Println(err)
 	}
-	fmt.Println("Try to start server...")
 
 	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
 	defer signal.Stop(shutdown)
 
+	<-shutdown
+
+	fmt.Println("Server stopped gracefully")
+}
+
+func startHttpServer(
+	lc fx.Lifecycle,
+	calcHandler internal.ICalculationHandler,
+	router *chi.Mux,
+) {
+	router.MethodFunc(http.MethodPost, "/calc", calcHandler.Calculate)
+
+	server := http.Server{
+		Addr:    "localhost:8080",
+		Handler: router,
+	}
+	fmt.Println("Try to start server...")
+	lc.Append(fx.Hook{
+		OnStart: func(ctx context.Context) error {
+			go func() {
+				fmt.Printf("Running server on port:%s", server.Addr)
+				err := server.ListenAndServe()
+				if err != nil && !errors.Is(err, http.ErrServerClosed) {
+					fmt.Println(err)
+				}
+			}()
+			return nil
+		},
+		OnStop: func(ctx context.Context) error {
+			return server.Shutdown(ctx)
+		},
+	})
+}
+
+func runHttpServer(
+	lc fx.Lifecycle,
+	calcHandler internal.ICalculationHandler,
+	router *chi.Mux,
+) {
+	router.MethodFunc(http.MethodPost, "/calc", calcHandler.Calculate)
+
+	server := http.Server{
+		Addr:    "localhost:8080",
+		Handler: router,
+	}
+	fmt.Println("Try to start server...")
+
 	go func() {
-		fmt.Printf("Server started working on port:%s", "8081")
+		fmt.Printf("Running server on port:%s", server.Addr)
 		err := server.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			fmt.Println(err)
 		}
 	}()
 
-	<-shutdown
-
-	fmt.Println("Shutdown signal received")
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
-	defer func() {
-		cancel()
-	}()
-
-	if err := app.Start(ctx); err != nil {
-		fmt.Println(err)
-	}
-
-	if err := server.Shutdown(ctx); err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println("Server stopped gracefully")
+	lc.Append(fx.Hook{
+		OnStop: func(ctx context.Context) error {
+			return server.Shutdown(ctx)
+		},
+	})
 }
-
-//func runCalculation(cm internal.ICalcManager, ch internal.ICalculationHandler, router *chi.Mux) {
-//	log.Print(cm.ManageCalculation(internal.AddOperationType).Calc(1, 2))
-//	log.Print(cm.ManageCalculation(internal.DivideOperationType).Calc(2, 4))
-//	router.MethodFunc(http.MethodPost, "/calc", ch.Calculate)
-//}
