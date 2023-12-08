@@ -1,15 +1,14 @@
 package internal
 
 import (
+	"app-reviews-proj/calculator/common"
 	"net/http"
 )
 
-type OperationType string
-
-const AddOperationType OperationType = "add"
-const DivideOperationType OperationType = "divide"
-const MultiplicationOperationType OperationType = "multiply"
-const SubtractionOperationType OperationType = "subtract"
+const AddOperationType common.OperationType = "add"
+const DivideOperationType common.OperationType = "divide"
+const MultiplicationOperationType common.OperationType = "multiply"
+const SubtractionOperationType common.OperationType = "subtract"
 
 type CalculationService interface {
 	Calc(a int, b int) int
@@ -31,7 +30,7 @@ type SubtractCalculationService interface {
 }
 
 type ICalcManager interface {
-	ManageCalculation(operation OperationType) CalculationService
+	ManageCalculation(operation common.OperationType) CalculationService
 }
 
 type ICalculationHandler interface {

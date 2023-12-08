@@ -1,4 +1,4 @@
-package service
+package model
 
 import "app-reviews-proj/calculator/internal"
 

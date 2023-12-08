@@ -1,6 +1,9 @@
 package service
 
-import "app-reviews-proj/calculator/internal"
+import (
+	"app-reviews-proj/calculator/common"
+	"app-reviews-proj/calculator/internal"
+)
 
 type calcManager struct {
 	add      internal.CalculationService // убираем логику инициализации
@@ -15,7 +18,7 @@ func NewCalculationManager(
 	multiply internal.MultiplyCalculationService,
 	subtract internal.SubtractCalculationService,
 ) internal.ICalcManager {
-	return calcManager{
+	return &calcManager{
 		add:      add,
 		divide:   divide,
 		multiply: multiply,
@@ -23,7 +26,7 @@ func NewCalculationManager(
 	}
 }
 
-func (c calcManager) ManageCalculation(operation internal.OperationType) internal.CalculationService {
+func (c *calcManager) ManageCalculation(operation common.OperationType) internal.CalculationService {
 	switch operation {
 	case internal.AddOperationType:
 		return c.add

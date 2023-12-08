@@ -1,8 +1,9 @@
 package main
 
 import (
-	"app-reviews-proj/calculator/handler"
 	"app-reviews-proj/calculator/internal"
+	"app-reviews-proj/calculator/internal/handler"
+	"app-reviews-proj/calculator/internal/model"
 	"app-reviews-proj/calculator/internal/service"
 	"context"
 	"errors"
@@ -15,8 +16,13 @@ import (
 	"syscall"
 )
 
-// добавить конфиг в файл conf с конфгурациями
-// подключить линтер, поправить ошибки
+// /cmd
+// Не стоит располагать в этой директории большие объёмы кода.
+// Если вы предполагаете дальнейшее использование кода в других проектах, вам стоит хранить его в директории /pkg в корне проекта.
+// Если же код не должен быть переиспользован где-то еще - ему самое место в директории /internal в корне проекта.
+
+// Самой распространённой практикой является использование маленькой main функции,
+// которая импортирует и вызывает весь необходимый код из директорий /internal и /pkg, но не из других.
 
 func main() {
 	//ao := service.NewAddOperation()
@@ -35,10 +41,10 @@ func main() {
 	}()
 
 	app := fx.New(
-		fx.Provide(service.NewAddOperation),
-		fx.Provide(service.NewDivideOperation),
-		fx.Provide(service.NewMultiplyOperation),
-		fx.Provide(service.NewSubtractOperation),
+		fx.Provide(model.NewAddOperation),
+		fx.Provide(model.NewDivideOperation),
+		fx.Provide(model.NewMultiplyOperation),
+		fx.Provide(model.NewSubtractOperation),
 		fx.Provide(service.NewCalculationManager),
 		fx.Provide(handler.NewHandler),
 		fx.Provide(chi.NewRouter),
@@ -88,6 +94,7 @@ func startHttpServer(
 	})
 }
 
+// alternative http-server runner
 func runHttpServer(
 	lc fx.Lifecycle,
 	calcHandler internal.ICalculationHandler,

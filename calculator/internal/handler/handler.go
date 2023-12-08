@@ -2,8 +2,8 @@ package handler
 
 import (
 	"app-reviews-proj/calculator/common"
-	serializer "app-reviews-proj/calculator/common/serilizer"
 	"app-reviews-proj/calculator/internal"
+	"app-reviews-proj/calculator/internal/serilizer"
 	"encoding/json"
 	"fmt"
 	log "github.com/sirupsen/logrus"
