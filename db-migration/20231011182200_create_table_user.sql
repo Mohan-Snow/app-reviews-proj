@@ -2,6 +2,8 @@
 -- +goose StatementBegin
 CREATE TYPE USER_ROLE AS ENUM ('USER', 'ADMIN');
 
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 CREATE TABLE IF NOT EXISTS users (
     id BIGSERIAL PRIMARY KEY,
     uuid uuid NOT NULL DEFAULT uuid_generate_v4(),

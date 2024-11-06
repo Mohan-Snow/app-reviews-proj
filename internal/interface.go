@@ -1,8 +1,9 @@
 package internal
 
 import (
-	"app-reviews-proj/calculator/common"
 	"net/http"
+
+	"app-reviews-proj/common"
 )
 
 const AddOperationType common.OperationType = "add"

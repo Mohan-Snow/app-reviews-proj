@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  app:
+    build: # Определяет контекст и путь к Dockerfile для сборки образа
+      context: . # Контекст сборки — это текущая директория, где расположен docker-compose.yml и Dockerfile
+      dockerfile: Dockerfile # Явно указываем имя Dockerfile, если оно отличается от стандартного Dockerfile
+    ports:
+      - "8080:8080" # Прокси-порты контейнера. Контейнер будет слушать на порту 8080, и этот порт будет проброшен на хост-машину на тот же порт (8080:8080)
+    environment: # Определение переменных окружения
+#      - ENV=production # В данном случае устанавливается переменная ENV=production, которую можно использовать внутри контейнера для конфигурации
+      - DB_HOST=postgres_db
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=postgres_app_reviews
+    restart: always # Настроено на always, чтобы контейнер автоматически перезапускался при сбоях или при перезапуске Docker
+    networks:
+      - app_network # Указывает, что контейнер будет подключен к сети app_network, чтобы, например, сервисы могли взаимодействовать друг с другом в будущем (если будет несколько сервисов)
+    volumes:
+      - .:/app # Монтирует текущую директорию проекта в контейнер, что позволяет изменять код и сразу видеть изменения в контейнере без необходимости пересобирать образ
+
+  postgres_db:
+    image: postgres:15
+    container_name: postgres_app_reviews
+    environment:
+      POSTGRES_DB: postgres_app_reviews
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    restart: always
+    volumes:
+      - postgres_app_reviews:/var/lib/postgresql/data # Монтирует том pg_data в директорию /var/lib/postgresql/data внутри контейнера для хранения данных базы данных. Это гарантирует, что данные сохранятся между перезапусками контейнера (при этом том будет создан и управляться Docker)
+    networks:
+      - app_network # Подключение к сети app_network (так же, как и сервис app), чтобы оба контейнера могли взаимодействовать друг с другом
+
+volumes:
+  postgres_app_reviews:
+    driver: local
+
+networks:
+  app_network:
+    driver: bridge

@@ -1,7 +1,7 @@
 package model
 
 import (
-	"app-reviews-proj/calculator/internal"
+	"app-reviews-proj/internal"
 )
 
 type divideOperation struct {

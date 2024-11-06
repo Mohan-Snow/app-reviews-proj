@@ -1,6 +1,8 @@
 package model
 
-import "app-reviews-proj/calculator/internal"
+import (
+	"app-reviews-proj/internal"
+)
 
 type addOperation struct{}
 

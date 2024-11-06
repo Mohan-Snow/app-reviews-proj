@@ -1,14 +1,16 @@
 package handler
 
 import (
-	"app-reviews-proj/calculator/common"
-	"app-reviews-proj/calculator/internal"
-	"app-reviews-proj/calculator/internal/serilizer"
 	"encoding/json"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
+
+	"app-reviews-proj/common"
+	"app-reviews-proj/internal"
+	"app-reviews-proj/internal/serilizer"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type Handler struct {

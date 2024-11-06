@@ -1,19 +1,26 @@
 package main
 
 import (
-	"app-reviews-proj/calculator/internal"
-	"app-reviews-proj/calculator/internal/handler"
-	"app-reviews-proj/calculator/internal/model"
-	"app-reviews-proj/calculator/internal/service"
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/go-chi/chi/v5"
-	"go.uber.org/fx"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+
+	_ "github.com/lib/pq"
+	"github.com/pressly/goose"
+
+	"github.com/go-chi/chi/v5"
+	log "github.com/sirupsen/logrus"
+	"go.uber.org/fx"
+
+	"app-reviews-proj/internal"
+	"app-reviews-proj/internal/handler"
+	"app-reviews-proj/internal/model"
+	"app-reviews-proj/internal/service"
 )
 
 // /cmd
@@ -32,6 +39,40 @@ func main() {
 	//cm := service.NewCalculationManager(ao, do)
 
 	ctx, cancel := context.WithCancel(context.Background())
+
+	// Получаем значения переменных окружения
+	dbHost := os.Getenv("DB_HOST")
+	dbPort := os.Getenv("DB_PORT")
+	dbUser := os.Getenv("DB_USER")
+	dbPassword := os.Getenv("DB_PASSWORD")
+	dbName := os.Getenv("DB_NAME")
+
+	// Если переменные окружения не заданы, выводим сообщение об ошибке
+	if dbHost == "" || dbPort == "" || dbUser == "" || dbPassword == "" || dbName == "" {
+		log.Fatal("Missing environment variables")
+	}
+
+	fmt.Printf("Connecting to database %s at %s:%s as user %s with password %s\n", dbName, dbHost, dbPort, dbUser, dbPassword)
+
+	connString := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		dbHost, dbPort, dbUser, dbPassword, dbName)
+
+	db, err := sql.Open("postgres", connString)
+	if err != nil {
+		log.Println("Database initializing error")
+		log.Fatal(err)
+	}
+	defer db.Close()
+	err = db.Ping()
+	if err != nil {
+		log.Println("Database ping error")
+		log.Fatal(err)
+	}
+
+	if err := goose.Up(db, "./db-migration"); err != nil {
+		log.Fatalf("migration failed; %v", err)
+	}
+
 	kill := make(chan os.Signal, 1)
 	signal.Notify(kill)
 

@@ -1,8 +1,8 @@
 package service
 
 import (
-	"app-reviews-proj/calculator/common"
-	"app-reviews-proj/calculator/internal"
+	"app-reviews-proj/common"
+	"app-reviews-proj/internal"
 )
 
 type calcManager struct {
