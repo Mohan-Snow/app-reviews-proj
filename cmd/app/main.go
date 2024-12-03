@@ -10,10 +10,9 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/go-chi/chi/v5"
 	_ "github.com/lib/pq"
 	"github.com/pressly/goose"
-
-	"github.com/go-chi/chi/v5"
 	log "github.com/sirupsen/logrus"
 	"go.uber.org/fx"
 
